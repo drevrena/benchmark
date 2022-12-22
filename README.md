@@ -1,3 +1,7 @@
+# Deno vs Node.js: Image process libs compared
+
+This piece of software compares performance between various libs available for Deno and Node.js
+
 # How to build & run
 
 
