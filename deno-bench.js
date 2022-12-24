@@ -1,9 +1,5 @@
 import { resize } from "https://deno.land/x/deno_image/mod.ts";
-import {
-  ImageMagick,
-  initializeImageMagick,
-  MagickFormat,
-} from "https://raw.githubusercontent.com/leonelv/deno-imagemagick/master/mod.ts";
+import {ImageMagick,initializeImageMagick,MagickFormat,} from "https://raw.githubusercontent.com/leonelv/deno-imagemagick/master/mod.ts";
 import { Image } from "https://deno.land/x/imagescript/mod.ts";
 import { createRequire } from "https://deno.land/std/node/module.ts";
 const require = createRequire(import.meta.url);
@@ -16,6 +12,7 @@ const width = 1024;
 const height = 768;
 
 const measures = [];
+const libs = ["deno_imagemagick","deno_image","deno_imagescript"]
 
 await initializeImageMagick();
 
@@ -24,86 +21,16 @@ for (let i = 0; i < 25; i++) {
   data.push(await runBench());
 }
 
-measures.push({
-  lib: "deno-imagemagick",
-  Avg:
-    (arrayAverage(data.map((item) => item.imagemagick)) / 1000.0).toFixed(3) +
-    "s",
-  Median:
-    (
-      quantile(
-        data.map((item) => item.imagemagick),
-        0.5
-      ) / 1000.0
-    ).toFixed(3) + "s",
-  Max:
-    (Math.max(...data.map((item) => item.imagemagick)) / 1000.0).toFixed(3) +
-    "s",
-  Min:
-    (Math.min(...data.map((item) => item.imagemagick)) / 1000.0).toFixed(3) +
-    "s",
-  p95:
-    (
-      quantile(
-        data.map((item) => item.imagemagick),
-        0.95
-      ) / 1000.0
-    ).toFixed(3) + "s",
-});
-
-measures.push({
-  lib: "deno-image",
-  Avg:
-    (arrayAverage(data.map((item) => item.deno_image)) / 1000.0).toFixed(3) +
-    "s",
-  Median:
-    (
-      quantile(
-        data.map((item) => item.deno_image),
-        0.5
-      ) / 1000.0
-    ).toFixed(3) + "s",
-  Max:
-    (Math.max(...data.map((item) => item.deno_image)) / 1000.0).toFixed(3) +
-    "s",
-  Min:
-    (Math.min(...data.map((item) => item.deno_image)) / 1000.0).toFixed(3) +
-    "s",
-  p95:
-    (
-      quantile(
-        data.map((item) => item.deno_image),
-        0.95
-      ) / 1000.0
-    ).toFixed(3) + "s",
-});
-
-measures.push({
-  lib: "deno-imagescript",
-  Avg:
-    (arrayAverage(data.map((item) => item.imagescript)) / 1000.0).toFixed(3) +
-    "s",
-  Median:
-    (
-      quantile(
-        data.map((item) => item.imagescript),
-        0.5
-      ) / 1000.0
-    ).toFixed(3) + "s",
-  Max:
-    (Math.max(...data.map((item) => item.imagescript)) / 1000.0).toFixed(3) +
-    "s",
-  Min:
-    (Math.min(...data.map((item) => item.imagescript)) / 1000.0).toFixed(3) +
-    "s",
-  p95:
-    (
-      quantile(
-        data.map((item) => item.imagescript),
-        0.95
-      ) / 1000.0
-    ).toFixed(3) + "s",
-});
+for (const lib of libs) {
+  measures.push({
+    lib: lib,
+    Avg: (arrayAverage(data.map((item) => item[lib])) / 1000.0).toFixed(3) + "s",
+    Median: (quantile(data.map((item) => item[lib]), 0.5) / 1000.0).toFixed(3) + "s",
+    Max: (Math.max(...data.map((item) => item[lib])) / 1000.0).toFixed(3) + "s",
+    Min: (Math.min(...data.map((item) => item[lib])) / 1000.0).toFixed(3) + "s",
+    p95: (quantile( data.map((item) => item[lib]), 0.95) / 1000.0).toFixed(3) + "s",
+  });
+}
 
 console.table(measures);
 
@@ -154,27 +81,8 @@ async function runBench() {
   performance.mark("Imagescript-end");
 
   return {
-    imagemagick: performance.measure(
-      "imagemagick",
-      "ImageMagick-start",
-      "ImageMagick-end"
-    ).duration,
-    deno_image: performance.measure(
-      "deno-image",
-      "Deno-image-start",
-      "Deno-image-end"
-    ).duration,
-    imagescript: performance.measure(
-      "imagescript",
-      "Imagescript-start",
-      "Imagescript-end"
-    ).duration,
+    deno_imagemagick: performance.measure("imagemagick","ImageMagick-start","ImageMagick-end").duration,
+    deno_image: performance.measure("deno-image","Deno-image-start","Deno-image-end").duration,
+    deno_imagescript: performance.measure("imagescript","Imagescript-start","Imagescript-end").duration,
   };
 }
-
-Number.prototype.toFixed = function (digits) {
-  var step = Math.pow(10, digits || 0);
-  var temp = Math.trunc(step * this);
-
-  return temp / step;
-};

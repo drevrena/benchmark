@@ -2,6 +2,7 @@ const { runJimp, runImageMagick, runGm, runSharp, runImageScript } = require("./
 const { arrayAverage, quantile } = require("./statistic.js");
 
 const measures = [];
+const libs = ["jimp","imagemagick","gm","sharp","imagescript"]
 
 async function main() {
   const data = [];
@@ -9,124 +10,16 @@ async function main() {
     data.push(await runBench());
   }
 
-  measures.push({
-    lib: "jimp",
-    Avg:
-      (arrayAverage(data.map((item) => item.jimp)) / 1000.0).toFixed(3) + "s",
-    Median:
-      (
-        quantile(
-          data.map((item) => item.jimp),
-          0.5
-        ) / 1000.0
-      ).toFixed(3) + "s",
-    Max: (Math.max(...data.map((item) => item.jimp)) / 1000.0).toFixed(3) + "s",
-    Min: (Math.min(...data.map((item) => item.jimp)) / 1000.0).toFixed(3) + "s",
-    p95:
-      (
-        quantile(
-          data.map((item) => item.jimp),
-          0.95
-        ) / 1000.0
-      ).toFixed(3) + "s",
-  });
-
-  measures.push({
-    lib: "imagemagick",
-    Avg:
-      (arrayAverage(data.map((item) => item.imagemagick)) / 1000.0).toFixed(3) +
-      "s",
-    Median:
-      (
-        quantile(
-          data.map((item) => item.imagemagick),
-          0.5
-        ) / 1000.0
-      ).toFixed(3) + "s",
-    Max:
-      (Math.max(...data.map((item) => item.imagemagick)) / 1000.0).toFixed(3) +
-      "s",
-    Min:
-      (Math.min(...data.map((item) => item.imagemagick)) / 1000.0).toFixed(3) +
-      "s",
-    p95:
-      (
-        quantile(
-          data.map((item) => item.imagemagick),
-          0.95
-        ) / 1000.0
-      ).toFixed(3) + "s",
-  });
-
-  measures.push({
-    lib: "gm",
-    Avg: (arrayAverage(data.map((item) => item.gm)) / 1000.0).toFixed(3) + "s",
-    Median:
-      (
-        quantile(
-          data.map((item) => item.gm),
-          0.5
-        ) / 1000.0
-      ).toFixed(3) + "s",
-    Max: (Math.max(...data.map((item) => item.gm)) / 1000.0).toFixed(3) + "s",
-    Min: (Math.min(...data.map((item) => item.gm)) / 1000.0).toFixed(3) + "s",
-    p95:
-      (
-        quantile(
-          data.map((item) => item.gm),
-          0.95
-        ) / 1000.0
-      ).toFixed(3) + "s",
-  });
-
-  measures.push({
-    lib: "sharp",
-    Avg:
-      (arrayAverage(data.map((item) => item.sharp)) / 1000.0).toFixed(3) + "s",
-    Median:
-      (
-        quantile(
-          data.map((item) => item.sharp),
-          0.5
-        ) / 1000.0
-      ).toFixed(3) + "s",
-    Max:
-      (Math.max(...data.map((item) => item.sharp)) / 1000.0).toFixed(3) + "s",
-    Min:
-      (Math.min(...data.map((item) => item.sharp)) / 1000.0).toFixed(3) + "s",
-    p95:
-      (
-        quantile(
-          data.map((item) => item.sharp),
-          0.95
-        ) / 1000.0
-      ).toFixed(3) + "s",
-  });
-
-  
-  measures.push({
-    lib: "imagescript",
-    Avg:
-      (arrayAverage(data.map((item) => item.imagescript)) / 1000.0).toFixed(3) + "s",
-    Median:
-      (
-        quantile(
-          data.map((item) => item.imagescript),
-          0.5
-        ) / 1000.0
-      ).toFixed(3) + "s",
-    Max:
-      (Math.max(...data.map((item) => item.imagescript)) / 1000.0).toFixed(3) + "s",
-    Min:
-      (Math.min(...data.map((item) => item.imagescript)) / 1000.0).toFixed(3) + "s",
-    p95:
-      (
-        quantile(
-          data.map((item) => item.imagescript),
-          0.95
-        ) / 1000.0
-      ).toFixed(3) + "s",
-  });
+  for (const lib of libs) {
+    measures.push({
+      lib: lib,
+      Avg: (arrayAverage(data.map((item) => item[lib])) / 1000.0).toFixed(3) + "s",
+      Median: (quantile(data.map((item) => item[lib]), 0.5) / 1000.0).toFixed(3) + "s",
+      Max: (Math.max(...data.map((item) => item[lib])) / 1000.0).toFixed(3) + "s",
+      Min: (Math.min(...data.map((item) => item[lib])) / 1000.0).toFixed(3) + "s",
+      p95: (quantile( data.map((item) => item[lib]), 0.95) / 1000.0).toFixed(3) + "s",
+    });
+  }
 
   console.table(measures);
 }
@@ -158,20 +51,9 @@ async function runBench() {
 
   return {
     jimp: performance.measure("Jimp", "Jimp-start", "Jimp-end").duration,
-    imagemagick: performance.measure(
-      "imagemagick",
-      "ImageMagick-start",
-      "ImageMagick-end"
-    ).duration,
+    imagemagick: performance.measure("imagemagick","ImageMagick-start","ImageMagick-end").duration,
     gm: performance.measure("gm", "gm-start", "gm-end").duration,
     sharp: performance.measure("sharp", "sharp-start", "sharp-end").duration,
     imagescript: performance.measure("imagescript", "imagescript-start", "imagescript-end").duration
   };
 }
-
-Number.prototype.toFixed = function (digits) {
-  var step = Math.pow(10, digits || 0);
-  var temp = Math.trunc(step * this);
-
-  return temp / step;
-};
